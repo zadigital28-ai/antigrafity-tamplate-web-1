@@ -394,8 +394,8 @@
             padding: 40px 0;
         }
         .bonus-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Sama dengan ukuran card produk */
+            display: flex;
+            flex-wrap: wrap;
             gap: 24px;
             justify-content: center;
         }
@@ -407,6 +407,9 @@
             transition: transform 0.3s, box-shadow 0.3s;
             background-color: var(--color-surface);
             border: 1px solid var(--border-color);
+            flex: 1 1 280px;
+            max-width: 350px;
+            width: 100%;
         }
         .bonus-item:hover {
             transform: translateY(-5px);
