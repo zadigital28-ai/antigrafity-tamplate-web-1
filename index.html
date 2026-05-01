@@ -42,14 +42,24 @@
             --card-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.3);
         }
 
-        /* Hide main scrollbar but keep page scrollable */
-        html::-webkit-scrollbar {
-            display: none;
-        }
+        /* Clean Main Scrollbar */
         html {
             scroll-behavior: smooth;
-            scrollbar-width: none; /* Firefox */
-            -ms-overflow-style: none; /* IE/Edge */
+        }
+        ::-webkit-scrollbar {
+            width: 12px;
+            height: 12px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--color-bg);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 999px;
+            border: 3px solid var(--color-bg);
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--color-text-muted);
         }
 
         * {
@@ -393,8 +403,7 @@
             height: auto;
             border-radius: 16px;
             box-shadow: var(--card-shadow);
-            object-fit: cover;
-            aspect-ratio: 16/9;
+            /* Rasio asli tetap terjaga */
         }
 
         /* Services Section */
@@ -631,23 +640,6 @@
             overflow-x: auto;
             padding-bottom: 15px;
         }
-        /* Testimonial horizontal scrollbar needs to be visible */
-        .marquee-wrapper::-webkit-scrollbar {
-            display: block;
-            height: 8px;
-        }
-        .marquee-wrapper::-webkit-scrollbar-track {
-            background: var(--color-surface); 
-            border-radius: 4px;
-        }
-        .marquee-wrapper::-webkit-scrollbar-thumb {
-            background: var(--border-color); 
-            border-radius: 4px;
-        }
-        .marquee-wrapper::-webkit-scrollbar-thumb:hover {
-            background: var(--color-text-muted); 
-        }
-
         .testi-grid {
             display: flex;
             gap: 24px;
@@ -723,6 +715,18 @@
             padding: 40px 0 20px;
             border-top: 1px solid var(--border-color);
             text-align: center;
+        }
+        .footer-brand-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+        .footer-logo {
+            height: 40px;
+            width: auto;
+            border-radius: 8px;
         }
         .social-links {
             display: flex;
@@ -1032,6 +1036,11 @@
                 justify-content: center;
                 gap: 1.5rem;
             }
+
+            .footer-brand-wrapper {
+                flex-direction: column;
+                gap: 10px;
+            }
         }
     </style>
 </head>
@@ -1186,7 +1195,10 @@
     <!-- Footer -->
     <footer>
         <div class="container">
-            <h2 class="font-heading" id="footer-brand">Brand Name</h2>
+            <div class="footer-brand-wrapper" id="footer-brand-wrapper">
+                <img src="" id="footer-logo" class="footer-logo hidden" alt="Footer Logo">
+                <h2 class="font-heading" id="footer-brand">Brand Name</h2>
+            </div>
             <div class="social-links" id="social-links">
                 <!-- Injected via JS -->
             </div>
@@ -1450,9 +1462,13 @@
             if(b.favicon_url) document.getElementById('favicon').setAttribute('href', escapeHTML(b.favicon_url));
 
             if(b.logo_url) {
-                const logo = document.getElementById('nav-logo');
-                logo.src = escapeHTML(b.logo_url);
-                logo.style.display = 'block';
+                const navLogo = document.getElementById('nav-logo');
+                navLogo.src = escapeHTML(b.logo_url);
+                navLogo.style.display = 'block';
+
+                const footLogo = document.getElementById('footer-logo');
+                footLogo.src = escapeHTML(b.logo_url);
+                footLogo.classList.remove('hidden');
             }
 
             // Hero Section Setup
