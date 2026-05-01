@@ -67,6 +67,13 @@
             padding: 0;
             box-sizing: border-box;
             font-family: 'DM Sans', sans-serif;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        html, body {
+            overflow-x: hidden; /* Prevent horizontal scroll */
+            width: 100%;
         }
 
         h1, h2, h3, h4, h5, h6, .font-heading {
@@ -78,7 +85,6 @@
             color: var(--color-text);
             transition: background-color 0.3s ease, color 0.3s ease;
             line-height: 1.5;
-            overflow-x: hidden;
             padding-top: 70px; /* Offset for fixed navbar */
         }
 
@@ -159,15 +165,6 @@
             z-index: 9999;
             transition: opacity 0.5s;
         }
-        .loader-brand {
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-            font-family: 'Syne', sans-serif;
-            background: linear-gradient(45deg, var(--color-accent), var(--color-secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
         .progress-bar-container {
             width: 200px;
             height: 4px;
@@ -234,19 +231,35 @@
         .nav-menu {
             display: flex;
             list-style: none;
-            gap: 20px;
+            gap: 24px;
             align-items: center;
             margin: 0;
             padding: 0;
         }
         .nav-link {
             font-size: 0.95rem;
-            font-weight: 500;
+            font-weight: 600;
             color: var(--color-text);
             transition: color 0.3s;
+            position: relative;
+            padding: 5px 0;
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 50%;
+            background-color: var(--color-accent);
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
         }
         .nav-link:hover {
             color: var(--color-accent);
+        }
+        .nav-link:hover::after {
+            width: 100%;
         }
 
         .nav-actions {
@@ -257,7 +270,9 @@
         }
         .cart-btn {
             position: relative;
-            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         .cart-badge {
             position: absolute;
@@ -395,9 +410,10 @@
             scroll-margin-top: 80px; /* Offset for anchor scroll */
         }
         .benefit-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            justify-content: center;
         }
         .benefit-card {
             background-color: var(--color-surface);
@@ -405,6 +421,9 @@
             border-radius: 16px;
             border: 1px solid var(--border-color);
             transition: transform 0.3s;
+            flex: 1 1 280px;
+            max-width: 380px;
+            width: 100%;
         }
         .benefit-card:hover {
             transform: translateY(-5px);
@@ -1058,19 +1077,19 @@
             .nav-menu {
                 position: fixed;
                 top: 70px;
-                left: -100%;
+                right: -100%; /* MENU MUNCUL DARI KANAN (RIGHT) */
                 width: 250px;
                 height: calc(100vh - 70px);
                 background-color: var(--color-surface);
                 flex-direction: column;
                 align-items: flex-start;
                 padding: 20px;
-                transition: left 0.3s ease;
-                border-right: 1px solid var(--border-color);
-                box-shadow: 5px 0 15px rgba(0,0,0,0.1);
+                transition: right 0.3s ease;
+                border-left: 1px solid var(--border-color);
+                box-shadow: -5px 0 15px rgba(0,0,0,0.1);
             }
             .nav-menu.active {
-                left: 0;
+                right: 0;
             }
             .nav-menu li {
                 width: 100%;
@@ -1081,6 +1100,13 @@
                 padding: 12px 0;
                 font-size: 1.1rem;
                 border-bottom: 1px solid var(--border-color);
+            }
+            .nav-link::after {
+                display: none; /* Hilangkan animasi underline di mobile */
+            }
+            .nav-link:hover {
+                background: none;
+                padding-left: 10px; /* Efek geser sedikit saat hover di mobile */
             }
         }
 
@@ -1109,6 +1135,7 @@
                 width: 100%;
                 height: 80vh;
                 border-radius: 20px 20px 0 0;
+                box-shadow: 0 -5px 25px rgba(0,0,0,0.1);
             }
             .cart-drawer.active {
                 top: 20vh;
@@ -1131,7 +1158,6 @@
 
     <!-- Loading Screen -->
     <div id="loading-screen">
-        <div class="loader-brand" id="loader-brand-name">Zadigital</div>
         <div class="progress-bar-container">
             <div class="progress-bar" id="loader-progress"></div>
         </div>
@@ -1145,7 +1171,7 @@
         <div class="container nav-content">
             <a href="#" class="logo-container">
                 <img id="nav-logo" src="" alt="Logo" class="logo-img">
-                <span id="nav-brand-name">Brand</span>
+                <span id="nav-brand-name"></span>
             </a>
             
             <!-- Navigation Menu -->
@@ -1160,7 +1186,11 @@
             <div class="nav-actions">
                 <button class="theme-toggle" id="theme-btn" aria-label="Toggle Theme">🌙</button>
                 <button class="cart-btn" id="cart-btn" aria-label="Cart">
-                    🛒
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <path d="M16 10a4 4 0 0 1-8 0"></path>
+                    </svg>
                     <span class="cart-badge" id="cart-count">0</span>
                 </button>
                 <!-- Hamburger Menu for Mobile/Tablet -->
@@ -1292,7 +1322,7 @@
         <div class="container">
             <div class="footer-brand-wrapper" id="footer-brand-wrapper">
                 <img src="" id="footer-logo" class="footer-logo hidden" alt="Footer Logo">
-                <h2 class="font-heading" id="footer-brand">Brand Name</h2>
+                <h2 class="font-heading" id="footer-brand"></h2>
             </div>
             <div class="social-links" id="social-links">
                 <!-- Injected via JS -->
@@ -1355,10 +1385,10 @@
     <script>
         // CONFIG URLs
         const URLS = {
-            branding: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSLPuGAN0ZH1nVms-o-LdYTAkFyAaYCvwEWqrxBPFclDvxbBBfCBN1pz8ih8EMZigLswGgxTUcyClk7/pub?gid=0&single=true&output=csv',
-            data: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSLPuGAN0ZH1nVms-o-LdYTAkFyAaYCvwEWqrxBPFclDvxbBBfCBN1pz8ih8EMZigLswGgxTUcyClk7/pub?gid=388669273&single=true&output=csv',
-            testimonials: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSLPuGAN0ZH1nVms-o-LdYTAkFyAaYCvwEWqrxBPFclDvxbBBfCBN1pz8ih8EMZigLswGgxTUcyClk7/pub?gid=1350731658&single=true&output=csv',
-            faq: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSLPuGAN0ZH1nVms-o-LdYTAkFyAaYCvwEWqrxBPFclDvxbBBfCBN1pz8ih8EMZigLswGgxTUcyClk7/pub?gid=1804604044&single=true&output=csv'
+            branding: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT686DKjaR_Xbm8GhR0cmzkRvOrV79-hpNfoId6egwiGlVHVggKzflda6MrYerjUsILoDvLU5EBaFCe/pub?gid=0&single=true&output=csv',
+            data: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT686DKjaR_Xbm8GhR0cmzkRvOrV79-hpNfoId6egwiGlVHVggKzflda6MrYerjUsILoDvLU5EBaFCe/pub?gid=388669273&single=true&output=csv',
+            testimonials: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT686DKjaR_Xbm8GhR0cmzkRvOrV79-hpNfoId6egwiGlVHVggKzflda6MrYerjUsILoDvLU5EBaFCe/pub?gid=1350731658&single=true&output=csv',
+            faq: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT686DKjaR_Xbm8GhR0cmzkRvOrV79-hpNfoId6egwiGlVHVggKzflda6MrYerjUsILoDvLU5EBaFCe/pub?gid=1804604044&single=true&output=csv'
         };
 
         // STATE
@@ -1463,47 +1493,34 @@
         // INITIALIZATION
         async function init() {
             try {
-                const cached = sessionStorage.getItem('appData');
-                if (cached) {
-                    const parsed = JSON.parse(cached);
-                    state.branding = parsed.branding;
-                    state.data = parsed.data;
-                    state.testimonials = parsed.testimonials;
-                    state.faq = parsed.faq;
-                    setTimeout(() => document.getElementById('loader-progress').style.width = '100%', 100);
-                } else {
-                    let progress = 10;
+                // Clear session storage automatically whenever URLS config changes in source code
+                // Or if we specifically want to force a refresh on init, we skip sessionStorage
+                sessionStorage.clear(); // FORCE RELOAD DATA FOR NOW
+                
+                let progress = 10;
+                document.getElementById('loader-progress').style.width = progress + '%';
+                
+                const fetchCSV = async (url) => {
+                    const res = await fetch(url);
+                    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+                    const text = await res.text();
+                    if (text.trim().toLowerCase().startsWith('<!doctype html>')) throw new Error('Received HTML instead of CSV.');
+                    progress += 20;
                     document.getElementById('loader-progress').style.width = progress + '%';
-                    
-                    const fetchCSV = async (url) => {
-                        const res = await fetch(url);
-                        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-                        const text = await res.text();
-                        if (text.trim().toLowerCase().startsWith('<!doctype html>')) throw new Error('Received HTML instead of CSV.');
-                        progress += 20;
-                        document.getElementById('loader-progress').style.width = progress + '%';
-                        return parseCSV(text);
-                    };
+                    return parseCSV(text);
+                };
 
-                    const [brandLines, dataLines, testiLines, faqLines] = await Promise.all([
-                        fetchCSV(URLS.branding),
-                        fetchCSV(URLS.data),
-                        fetchCSV(URLS.testimonials),
-                        fetchCSV(URLS.faq)
-                    ]);
+                const [brandLines, dataLines, testiLines, faqLines] = await Promise.all([
+                    fetchCSV(URLS.branding),
+                    fetchCSV(URLS.data),
+                    fetchCSV(URLS.testimonials),
+                    fetchCSV(URLS.faq)
+                ]);
 
-                    state.branding = kvToObject(brandLines);
-                    state.data = csvToObjects(dataLines);
-                    state.testimonials = csvToObjects(testiLines);
-                    state.faq = csvToObjects(faqLines);
-
-                    sessionStorage.setItem('appData', JSON.stringify({
-                        branding: state.branding,
-                        data: state.data,
-                        testimonials: state.testimonials,
-                        faq: state.faq
-                    }));
-                }
+                state.branding = kvToObject(brandLines);
+                state.data = csvToObjects(dataLines);
+                state.testimonials = csvToObjects(testiLines);
+                state.faq = csvToObjects(faqLines);
 
                 applyTheme();
                 renderBranding();
@@ -1535,7 +1552,7 @@
                     <div style="color:red; text-align:center; padding:20px;">
                         <h2>Gagal Memuat Data</h2>
                         <p>${error.message}</p>
-                        <button onclick="sessionStorage.clear(); location.reload();" class="btn btn-primary mt-8">Coba Lagi</button>
+                        <button onclick="location.reload();" class="btn btn-primary mt-8">Coba Lagi</button>
                     </div>`;
             }
         }
@@ -1544,12 +1561,11 @@
         function renderBranding() {
             const b = state.branding;
             
-            if(b.brand_name) {
-                document.title = escapeHTML(b.brand_name);
-                document.getElementById('nav-brand-name').textContent = escapeHTML(b.brand_name);
-                document.getElementById('loader-brand-name').textContent = escapeHTML(b.brand_name);
-                document.getElementById('footer-brand').textContent = escapeHTML(b.brand_name);
-            }
+            const brandName = b.brand_name ? escapeHTML(b.brand_name) : '';
+            document.title = brandName || 'Toko Produk Digital';
+            document.getElementById('nav-brand-name').textContent = brandName;
+            document.getElementById('footer-brand').textContent = brandName;
+
             if(b.seo_title) document.title = escapeHTML(b.seo_title);
             if(b.seo_desc) document.querySelector('meta[name="description"]').setAttribute('content', escapeHTML(b.seo_desc));
             if(b.seo_keywords) document.querySelector('meta[name="keywords"]').setAttribute('content', escapeHTML(b.seo_keywords));
@@ -1591,7 +1607,9 @@
 
             let hasBenefit = false;
             const benefitGrid = document.getElementById('benefit-grid');
-            for(let i=1; i<=4; i++) {
+            benefitGrid.innerHTML = '';
+            // Diperbarui menjadi sampai 6
+            for(let i=1; i<=6; i++) {
                 if(b[`benefit_${i}_title`] || b[`benefit_${i}_desc`]) {
                     hasBenefit = true;
                     benefitGrid.innerHTML += `
@@ -1609,6 +1627,7 @@
 
             let hasBonus = false;
             const bonusGrid = document.getElementById('bonus-grid');
+            bonusGrid.innerHTML = '';
             for(let i=1; i<=3; i++) {
                 if(b[`bonus_${i}`]) {
                     hasBonus = true;
