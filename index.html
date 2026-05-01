@@ -440,7 +440,7 @@
         }
         .product-card-img {
             width: 100%;
-            height: 180px;
+            aspect-ratio: 1 / 1;
             object-fit: cover;
             border-bottom: 1px solid var(--border-color);
         }
@@ -796,7 +796,8 @@
             width: 100%;
             max-width: 600px;
             max-height: 90vh;
-            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
             position: relative;
             transform: translateY(20px);
             transition: 0.3s;
@@ -810,6 +811,7 @@
             top: 15px;
             right: 15px;
             background-color: var(--color-surface);
+            color: var(--color-text);
             width: 32px;
             height: 32px;
             border-radius: 50%;
@@ -817,7 +819,34 @@
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            z-index: 10;
+            z-index: 20;
+            border: 1px solid var(--border-color);
+            transition: background-color 0.2s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .modal-close:hover {
+            background-color: #ef4444;
+            color: white;
+            border-color: #ef4444;
+        }
+        .modal-body-scroll {
+            overflow-y: auto;
+            flex-grow: 1;
+            scrollbar-width: none; /* Firefox */
+        }
+        .modal-body-scroll::-webkit-scrollbar {
+            display: none; /* Chrome */
+        }
+        .modal-footer {
+            padding: 15px 20px;
+            border-top: 1px solid var(--border-color);
+            background-color: var(--color-surface);
+            display: flex;
+            gap: 10px;
+            border-radius: 0 0 16px 16px;
+        }
+        .modal-footer .btn {
+            flex: 1;
         }
         .product-modal-images {
             display: flex;
@@ -831,16 +860,19 @@
             border-radius: 8px;
             scroll-snap-align: start;
             flex-shrink: 0;
-            object-fit: contain;
+            object-fit: cover;
             max-height: 300px;
+            aspect-ratio: 16/9;
         }
         .product-modal-details { padding: 0 20px 20px; }
         
         .promo-img {
-            width: 100%;
-            height: auto;
+            max-width: 100%;
+            max-height: 80vh;
+            object-fit: contain;
             border-radius: 16px;
             display: block;
+            margin: 0 auto;
         }
 
         /* Scroll Top */
@@ -1066,19 +1098,25 @@
     <div class="modal-overlay" id="product-modal">
         <div class="modal-content">
             <button class="modal-close" id="close-product-modal">&times;</button>
-            <div class="product-modal-images" id="modal-images"></div>
-            <div class="product-modal-details">
-                <h2 id="modal-title" class="font-heading mb-4 mt-8">Title</h2>
-                <div id="modal-desc" style="line-height: 1.6; color: var(--color-text-muted);"></div>
+            <div class="modal-body-scroll">
+                <div class="product-modal-images" id="modal-images"></div>
+                <div class="product-modal-details">
+                    <h2 id="modal-title" class="font-heading mb-4 mt-8">Title</h2>
+                    <div id="modal-desc" style="line-height: 1.6; color: var(--color-text-muted);"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="modal-btn-cart">+ Keranjang</button>
+                <button class="btn btn-primary" id="modal-btn-buy">Beli Sekarang</button>
             </div>
         </div>
     </div>
 
     <!-- Promo Popup -->
     <div class="modal-overlay" id="promo-popup">
-        <div class="modal-content" style="background: transparent; border: none; box-shadow: none;">
-            <button class="modal-close" id="close-promo" style="top: -15px; right: -15px; background: white; color: black;">&times;</button>
-            <a href="#" id="promo-link" target="_blank" style="pointer-events: none;">
+        <div class="modal-content" style="background: transparent; border: none; box-shadow: none; align-items: center; max-width: 90vw;">
+            <button class="modal-close" id="close-promo" style="top: -10px; right: -10px; background: #fff; color: #000;">&times;</button>
+            <a href="#" id="promo-link" target="_blank" style="pointer-events: none; width: 100%; display: flex; justify-content: center;">
                 <img src="" id="promo-img" class="promo-img" alt="Promo">
             </a>
         </div>
@@ -1252,7 +1290,6 @@
                     setTimeout(() => loader.style.display = 'none', 500);
                 }, 500);
 
-                // Initialize Testimonial Marquee behavior
                 const testiGrid = document.getElementById('testi-grid');
                 if (testiGrid) {
                     testiGrid.addEventListener('click', () => {
@@ -1688,6 +1725,22 @@
                 }
             }
             imagesDiv.style.display = imagesDiv.innerHTML ? 'flex' : 'none';
+            
+            // Setup buttons in footer
+            const isOut = (item.stok || '').toLowerCase() === 'habis';
+            const btnCart = document.getElementById('modal-btn-cart');
+            const btnBuy = document.getElementById('modal-btn-buy');
+            btnCart.disabled = isOut;
+            btnBuy.disabled = isOut;
+            btnCart.onclick = () => {
+                prodModal.classList.remove('active');
+                addToCart(index, false);
+            };
+            btnBuy.onclick = () => {
+                prodModal.classList.remove('active');
+                buyNow(index);
+            };
+
             prodModal.classList.add('active');
         }
         document.getElementById('close-product-modal').addEventListener('click', () => prodModal.classList.remove('active'));
