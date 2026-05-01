@@ -79,6 +79,7 @@
             transition: background-color 0.3s ease, color 0.3s ease;
             line-height: 1.5;
             overflow-x: hidden;
+            padding-top: 70px; /* Offset for fixed navbar */
         }
 
         a {
@@ -197,12 +198,12 @@
             40% { transform: scale(1); }
         }
 
-        /* Navbar */
+        /* Navbar & Navigation Menu */
         nav {
             position: fixed;
             top: 0;
             width: 100%;
-            background: rgba(var(--color-bg), 0.8);
+            background: rgba(var(--color-bg), 0.9);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             z-index: 1000;
@@ -222,16 +223,37 @@
             font-size: 1.5rem;
             font-weight: 700;
             font-family: 'Syne', sans-serif;
+            z-index: 1001; /* Ensure above mobile menu */
         }
         .logo-img {
             height: 40px;
             border-radius: 8px;
             display: none;
         }
+        
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            gap: 20px;
+            align-items: center;
+            margin: 0;
+            padding: 0;
+        }
+        .nav-link {
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--color-text);
+            transition: color 0.3s;
+        }
+        .nav-link:hover {
+            color: var(--color-accent);
+        }
+
         .nav-actions {
             display: flex;
             align-items: center;
             gap: 1rem;
+            z-index: 1001;
         }
         .cart-btn {
             position: relative;
@@ -253,10 +275,17 @@
         .theme-toggle {
             font-size: 1.5rem;
         }
+        
+        .menu-toggle {
+            display: none;
+            font-size: 1.5rem;
+            margin-left: 10px;
+            font-weight: bold;
+        }
 
         /* Hero Section */
         #hero {
-            padding: 120px 0 80px;
+            padding: 80px 0 80px;
             position: relative;
             overflow: hidden;
         }
@@ -363,6 +392,7 @@
         /* Benefit Section */
         #benefit {
             padding: 60px 0;
+            scroll-margin-top: 80px; /* Offset for anchor scroll */
         }
         .benefit-grid {
             display: grid;
@@ -392,6 +422,7 @@
         /* Bonus Section */
         #bonus {
             padding: 40px 0;
+            scroll-margin-top: 80px;
         }
         .bonus-grid {
             display: flex;
@@ -407,9 +438,10 @@
             transition: transform 0.3s, box-shadow 0.3s;
             background-color: var(--color-surface);
             border: 1px solid var(--border-color);
-            flex: 1 1 280px;
-            max-width: 350px;
-            width: 100%;
+            
+            /* FIXED WIDTH - Ini akan mencegah gambar rata kiri jika jumlahnya sedikit */
+            width: 300px; 
+            max-width: 100%;
         }
         .bonus-item:hover {
             transform: translateY(-5px);
@@ -426,6 +458,7 @@
         /* Services Section */
         #services {
             padding: 80px 0;
+            scroll-margin-top: 80px;
         }
         .controls-container {
             display: flex;
@@ -652,6 +685,7 @@
             padding: 80px 0;
             background-color: var(--color-surface);
             overflow: hidden;
+            scroll-margin-top: 80px;
         }
         .marquee-wrapper {
             overflow-x: auto;
@@ -687,6 +721,7 @@
         /* FAQ Section */
         #faq {
             padding: 80px 0;
+            scroll-margin-top: 80px;
         }
         .faq-item {
             border-bottom: 1px solid var(--border-color);
@@ -1018,6 +1053,37 @@
         }
 
         /* Responsive */
+        @media (max-width: 900px) { /* Tablet & Mobile Menu Toggle */
+            .menu-toggle { display: block; }
+            .nav-menu {
+                position: fixed;
+                top: 70px;
+                left: -100%;
+                width: 250px;
+                height: calc(100vh - 70px);
+                background-color: var(--color-surface);
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 20px;
+                transition: left 0.3s ease;
+                border-right: 1px solid var(--border-color);
+                box-shadow: 5px 0 15px rgba(0,0,0,0.1);
+            }
+            .nav-menu.active {
+                left: 0;
+            }
+            .nav-menu li {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+            .nav-link {
+                display: block;
+                padding: 12px 0;
+                font-size: 1.1rem;
+                border-bottom: 1px solid var(--border-color);
+            }
+        }
+
         @media (max-width: 768px) {
             .info-grid { grid-template-columns: 1fr; }
             .hero-title { font-size: 2.5rem; }
@@ -1081,12 +1147,24 @@
                 <img id="nav-logo" src="" alt="Logo" class="logo-img">
                 <span id="nav-brand-name">Brand</span>
             </a>
+            
+            <!-- Navigation Menu -->
+            <ul class="nav-menu" id="nav-menu">
+                <li id="nav-item-benefit" class="hidden"><a href="#benefit" class="nav-link" id="nav-link-benefit">Kenapa Memilih Kami?</a></li>
+                <li id="nav-item-bonus" class="hidden"><a href="#bonus" class="nav-link">Bonus</a></li>
+                <li id="nav-item-services"><a href="#services" class="nav-link">Katalog Produk</a></li>
+                <li id="nav-item-testimonials" class="hidden"><a href="#testimonials" class="nav-link">Testimoni</a></li>
+                <li id="nav-item-faq" class="hidden"><a href="#faq" class="nav-link">FAQ</a></li>
+            </ul>
+
             <div class="nav-actions">
                 <button class="theme-toggle" id="theme-btn" aria-label="Toggle Theme">🌙</button>
                 <button class="cart-btn" id="cart-btn" aria-label="Cart">
                     🛒
                     <span class="cart-badge" id="cart-count">0</span>
                 </button>
+                <!-- Hamburger Menu for Mobile/Tablet -->
+                <button class="menu-toggle" id="menu-btn" aria-label="Menu">☰</button>
             </div>
         </div>
     </nav>
@@ -1142,7 +1220,7 @@
     <!-- Benefit Section -->
     <section id="benefit" class="hidden">
         <div class="container">
-            <h2 class="font-heading text-center mb-8">Kenapa Memilih Kami?</h2>
+            <h2 class="font-heading text-center mb-8" id="benefit-title">Kenapa Memilih Kami?</h2>
             <div class="benefit-grid" id="benefit-grid">
                 <!-- Injected via JS -->
             </div>
@@ -1488,6 +1566,11 @@
                 footLogo.classList.remove('hidden');
             }
 
+            // Benefit Title Sync (Section & Nav Menu)
+            const benefitTitleStr = b.benefit_title ? escapeHTML(b.benefit_title) : 'Kenapa Memilih Kami?';
+            document.getElementById('benefit-title').textContent = benefitTitleStr;
+            document.getElementById('nav-link-benefit').textContent = benefitTitleStr;
+
             // Hero Section Setup
             if(b.hero_title) document.getElementById('hero-title').innerHTML = sanitizeHTML(b.hero_title);
             if(b.hero_subtitle) document.getElementById('hero-subtitle').innerHTML = sanitizeHTML(b.hero_subtitle);
@@ -1519,7 +1602,10 @@
                     `;
                 }
             }
-            if(hasBenefit) document.getElementById('benefit').classList.remove('hidden');
+            if(hasBenefit) {
+                document.getElementById('benefit').classList.remove('hidden');
+                document.getElementById('nav-item-benefit').classList.remove('hidden');
+            }
 
             let hasBonus = false;
             const bonusGrid = document.getElementById('bonus-grid');
@@ -1538,7 +1624,10 @@
                     `;
                 }
             }
-            if(hasBonus) document.getElementById('bonus').classList.remove('hidden');
+            if(hasBonus) {
+                document.getElementById('bonus').classList.remove('hidden');
+                document.getElementById('nav-item-bonus').classList.remove('hidden');
+            }
 
             if(b.footer_text) document.getElementById('footer-text').innerHTML = sanitizeHTML(b.footer_text);
 
@@ -1588,6 +1677,22 @@
             const newTheme = current === 'dark' ? 'light' : 'dark';
             localStorage.setItem('theme', newTheme);
             applyTheme();
+        });
+
+        // Hamburger Menu Logic
+        const menuBtn = document.getElementById('menu-btn');
+        const navMenu = document.getElementById('nav-menu');
+        
+        menuBtn.addEventListener('click', () => {
+            navMenu.classList.toggle('active');
+            menuBtn.textContent = navMenu.classList.contains('active') ? '✕' : '☰';
+        });
+
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                navMenu.classList.remove('active');
+                menuBtn.textContent = '☰';
+            });
         });
 
         function setupFilters() {
@@ -1924,6 +2029,7 @@
             if(state.testimonials.length === 0) return;
             
             document.getElementById('testimonials').classList.remove('hidden');
+            document.getElementById('nav-item-testimonials').classList.remove('hidden');
             
             let html = '';
             state.testimonials.forEach(t => {
@@ -1957,6 +2063,8 @@
             if(state.faq.length === 0) return;
             
             document.getElementById('faq').classList.remove('hidden');
+            document.getElementById('nav-item-faq').classList.remove('hidden');
+
             state.faq.forEach((f, index) => {
                 const item = document.createElement('div');
                 item.className = 'faq-item';
