@@ -390,8 +390,11 @@
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
+            width: 100%;
         }
         .tab-btn {
+            flex-grow: 1;
+            text-align: center;
             padding: 8px 16px;
             border-radius: 999px;
             background-color: var(--color-surface);
@@ -399,6 +402,7 @@
             color: var(--color-text);
             font-weight: 500;
             transition: all 0.2s;
+            white-space: nowrap;
         }
         .tab-btn.active {
             background-color: var(--color-accent);
@@ -539,7 +543,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 15px;
+            gap: 10px;
             margin-top: 40px;
         }
         .page-btn {
@@ -548,6 +552,9 @@
             background-color: var(--color-surface);
             border: 1px solid var(--border-color);
             transition: 0.3s;
+            min-width: 40px;
+            text-align: center;
+            font-weight: bold;
         }
         .page-btn:hover:not(:disabled) {
             background-color: var(--color-accent);
@@ -575,9 +582,9 @@
             display: flex;
             gap: 24px;
             width: max-content;
-            animation: marquee 30s linear infinite;
+            animation: marquee 50s linear infinite; /* Slower */
         }
-        .testi-grid:hover {
+        .testi-grid.paused {
             animation-play-state: paused;
         }
         @keyframes marquee {
@@ -605,6 +612,7 @@
         .faq-item {
             border-bottom: 1px solid var(--border-color);
             padding: 15px 0;
+            overflow: hidden;
         }
         .faq-question {
             width: 100%;
@@ -614,25 +622,29 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 15px;
         }
         .faq-question::after {
             content: '+';
             font-size: 1.5rem;
             color: var(--color-accent);
             transition: transform 0.3s;
+            flex-shrink: 0;
         }
         .faq-item.active .faq-question::after {
             transform: rotate(45deg);
         }
         .faq-answer {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease;
+            display: grid;
+            grid-template-rows: 0fr;
+            transition: grid-template-rows 0.3s ease;
             color: var(--color-text-muted);
         }
+        .faq-answer > div {
+            overflow: hidden;
+        }
         .faq-item.active .faq-answer {
-            max-height: 500px;
-            margin-top: 10px;
+            grid-template-rows: 1fr;
         }
 
         /* Footer */
@@ -1240,6 +1252,17 @@
                     setTimeout(() => loader.style.display = 'none', 500);
                 }, 500);
 
+                // Initialize Testimonial Marquee behavior
+                const testiGrid = document.getElementById('testi-grid');
+                if (testiGrid) {
+                    testiGrid.addEventListener('click', () => {
+                        testiGrid.classList.add('paused');
+                    });
+                    window.addEventListener('scroll', () => {
+                        testiGrid.classList.remove('paused');
+                    });
+                }
+
             } catch (error) {
                 console.error("Initialization error:", error);
                 document.getElementById('loading-screen').innerHTML = `
@@ -1492,21 +1515,28 @@
 
             const prev = document.createElement('button');
             prev.className = 'page-btn';
-            prev.textContent = 'Sebelumnya';
+            prev.textContent = '«';
             prev.disabled = state.currentPage === 1;
             prev.onclick = () => { state.currentPage--; renderProducts(); document.getElementById('services').scrollIntoView(); };
-            
+            pagDiv.appendChild(prev);
+
+            for(let i=1; i<=totalPages; i++) {
+                const btn = document.createElement('button');
+                btn.className = 'page-btn';
+                btn.textContent = i;
+                if(state.currentPage === i) {
+                    btn.style.backgroundColor = 'var(--color-accent)';
+                    btn.style.color = '#000';
+                }
+                btn.onclick = () => { state.currentPage = i; renderProducts(); document.getElementById('services').scrollIntoView(); };
+                pagDiv.appendChild(btn);
+            }
+
             const next = document.createElement('button');
             next.className = 'page-btn';
-            next.textContent = 'Selanjutnya';
+            next.textContent = '»';
             next.disabled = state.currentPage === totalPages;
             next.onclick = () => { state.currentPage++; renderProducts(); document.getElementById('services').scrollIntoView(); };
-
-            const info = document.createElement('span');
-            info.textContent = `Halaman ${state.currentPage} dari ${totalPages}`;
-
-            pagDiv.appendChild(prev);
-            pagDiv.appendChild(info);
             pagDiv.appendChild(next);
         }
 
@@ -1685,12 +1715,12 @@
                     </div>
                 `;
             });
-            // Duplicate array items for seamless marquee loop
+            
             if(state.testimonials.length > 2) {
                 grid.innerHTML = html + html;
             } else {
                 grid.innerHTML = html;
-                grid.style.animation = 'none'; // turn off animation if too few items
+                grid.style.animation = 'none';
                 grid.style.width = '100%';
                 grid.style.justifyContent = 'center';
             }
@@ -1707,7 +1737,7 @@
                 item.className = 'faq-item';
                 item.innerHTML = `
                     <button class="faq-question">${escapeHTML(f.pertanyaan || f.question || '')}</button>
-                    <div class="faq-answer"><div style="padding-top:10px;">${sanitizeHTML(f.jawaban || f.answer || '')}</div></div>
+                    <div class="faq-answer"><div><div style="padding-top:15px; padding-bottom:10px;">${sanitizeHTML(f.jawaban || f.answer || '')}</div></div></div>
                 `;
                 item.querySelector('.faq-question').addEventListener('click', () => {
                     item.classList.toggle('active');
