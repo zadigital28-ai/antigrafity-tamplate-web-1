@@ -241,9 +241,42 @@
         /* Hero Section */
         #hero {
             padding: 120px 0 80px;
-            text-align: center;
             position: relative;
             overflow: hidden;
+        }
+        .hero-container {
+            display: flex;
+            align-items: center;
+            justify-content: center; /* Center if no image */
+            flex-direction: column; /* Default column for no image */
+            gap: 40px;
+        }
+        #hero.has-image .hero-container {
+            flex-direction: row; /* Desktop row */
+        }
+        .hero-image-wrapper {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+        }
+        .hero-img {
+            max-width: 100%;
+            height: auto;
+            max-height: 500px;
+            object-fit: contain;
+            animation: float 4s ease-in-out infinite;
+        }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
+        }
+        .hero-content {
+            flex: 1;
+            text-align: center; /* Default center */
+        }
+        #hero.has-image .hero-content {
+            text-align: left;
         }
         .hero-title {
             font-size: 3.5rem;
@@ -259,11 +292,18 @@
             max-width: 600px;
             margin: 0 auto 40px;
         }
+        #hero.has-image .hero-subtitle {
+            margin-left: 0;
+            margin-right: 0;
+        }
         .hero-stats {
             display: flex;
             justify-content: center;
             gap: 2rem;
             margin-top: 60px;
+        }
+        #hero.has-image .hero-stats {
+            justify-content: flex-start;
         }
         .stat-item h3 {
             font-size: 2rem;
@@ -952,6 +992,17 @@
         @media (max-width: 768px) {
             .info-grid { grid-template-columns: 1fr; }
             .hero-title { font-size: 2.5rem; }
+            
+            #hero.has-image .hero-container {
+                flex-direction: column;
+            }
+            #hero.has-image .hero-content {
+                text-align: center;
+            }
+            #hero.has-image .hero-stats {
+                justify-content: center;
+            }
+
             .cart-drawer {
                 right: 0;
                 top: 100%;
@@ -1003,27 +1054,35 @@
 
     <!-- Hero Section -->
     <header id="hero">
-        <div class="container">
-            <h1 class="hero-title" id="hero-title">Judul Hero</h1>
-            <p class="hero-subtitle" id="hero-subtitle">Subjudul akan muncul di sini</p>
-            <a href="#services" class="btn btn-primary">Lihat Layanan Kami</a>
-            
-            <!-- HERO STATS START (Anda bisa menghapus blok ini jika tidak ingin stats) -->
-            <div class="hero-stats">
-                <div class="stat-item">
-                    <h3>10K+</h3>
-                    <p>Order Selesai</p>
-                </div>
-                <div class="stat-item">
-                    <h3>500+</h3>
-                    <p>Pelanggan Aktif</p>
-                </div>
-                <div class="stat-item">
-                    <h3>99%</h3>
-                    <p>Tingkat Berhasil</p>
-                </div>
+        <div class="container hero-container">
+            <!-- Hero Image Wrapper (Kiri di desktop, atas di mobile) -->
+            <div class="hero-image-wrapper hidden" id="hero-image-wrapper">
+                <img src="" id="hero-img" class="hero-img" alt="Hero Image">
             </div>
-            <!-- HERO STATS END -->
+
+            <!-- Hero Content -->
+            <div class="hero-content">
+                <h1 class="hero-title" id="hero-title">Judul Hero</h1>
+                <p class="hero-subtitle" id="hero-subtitle">Subjudul akan muncul di sini</p>
+                <a href="#services" class="btn btn-primary">Lihat Layanan Kami</a>
+                
+                <!-- HERO STATS START -->
+                <div class="hero-stats">
+                    <div class="stat-item">
+                        <h3>10K+</h3>
+                        <p>Order Selesai</p>
+                    </div>
+                    <div class="stat-item">
+                        <h3>500+</h3>
+                        <p>Pelanggan Aktif</p>
+                    </div>
+                    <div class="stat-item">
+                        <h3>99%</h3>
+                        <p>Tingkat Berhasil</p>
+                    </div>
+                </div>
+                <!-- HERO STATS END -->
+            </div>
         </div>
     </header>
 
@@ -1381,8 +1440,16 @@
                 logo.style.display = 'block';
             }
 
+            // Hero Section Setup
             if(b.hero_title) document.getElementById('hero-title').innerHTML = sanitizeHTML(b.hero_title);
             if(b.hero_subtitle) document.getElementById('hero-subtitle').innerHTML = sanitizeHTML(b.hero_subtitle);
+            if(b.hero_image) {
+                const imgWrap = document.getElementById('hero-image-wrapper');
+                const imgEl = document.getElementById('hero-img');
+                imgEl.src = escapeHTML(b.hero_image);
+                imgWrap.classList.remove('hidden');
+                document.getElementById('hero').classList.add('has-image');
+            }
 
             if(b.info_title || b.info_body || b.catatan) {
                 document.getElementById('info').classList.remove('hidden');
