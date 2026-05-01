@@ -395,15 +395,29 @@
         }
         .bonus-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Sama dengan ukuran card produk */
+            gap: 24px;
+            justify-content: center;
+        }
+        .bonus-item {
+            display: block;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            transition: transform 0.3s, box-shadow 0.3s;
+            background-color: var(--color-surface);
+            border: 1px solid var(--border-color);
+        }
+        .bonus-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 20px rgba(14, 238, 247, 0.2);
+            border-color: var(--color-accent);
         }
         .bonus-img {
             width: 100%;
             height: auto;
-            border-radius: 16px;
-            box-shadow: var(--card-shadow);
-            /* Rasio asli tetap terjaga */
+            display: block;
+            /* Rasio asli tetap terjaga otomatis karena height: auto */
         }
 
         /* Services Section */
@@ -1509,7 +1523,16 @@
             for(let i=1; i<=3; i++) {
                 if(b[`bonus_${i}`]) {
                     hasBonus = true;
-                    bonusGrid.innerHTML += `<img src="${escapeHTML(b[`bonus_${i}`])}" alt="Bonus ${i}" class="bonus-img" loading="lazy">`;
+                    const linkKey = `bonus_link_${i}`;
+                    const targetLink = b[linkKey] ? escapeHTML(b[linkKey]) : '#';
+                    const targetAttr = b[linkKey] ? 'target="_blank"' : '';
+                    const pointerStyle = !b[linkKey] ? 'style="pointer-events: none;"' : '';
+                    
+                    bonusGrid.innerHTML += `
+                        <a href="${targetLink}" ${targetAttr} class="bonus-item" ${pointerStyle}>
+                            <img src="${escapeHTML(b[`bonus_${i}`])}" alt="Bonus ${i}" class="bonus-img" loading="lazy">
+                        </a>
+                    `;
                 }
             }
             if(hasBonus) document.getElementById('bonus').classList.remove('hidden');
