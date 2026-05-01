@@ -42,8 +42,14 @@
             --card-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.3);
         }
 
+        /* Hide main scrollbar but keep page scrollable */
+        html::-webkit-scrollbar {
+            display: none;
+        }
         html {
             scroll-behavior: smooth;
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE/Edge */
         }
 
         * {
@@ -625,7 +631,9 @@
             overflow-x: auto;
             padding-bottom: 15px;
         }
+        /* Testimonial horizontal scrollbar needs to be visible */
         .marquee-wrapper::-webkit-scrollbar {
+            display: block;
             height: 8px;
         }
         .marquee-wrapper::-webkit-scrollbar-track {
@@ -1002,6 +1010,11 @@
             #hero.has-image .hero-stats {
                 justify-content: center;
             }
+            .hero-img {
+                max-width: 80%; /* Diperkecil 20% di mobile */
+                max-height: 350px;
+                margin: 0 auto;
+            }
 
             .cart-drawer {
                 right: 0;
@@ -1332,7 +1345,9 @@
             const obj = {};
             csvLines.forEach(line => {
                 if (line.length >= 2 && line[0].trim() !== '') {
-                    obj[line[0].trim()] = line[1].trim();
+                    // Normalize key: lowercase and replace spaces with underscore to prevent mismatch
+                    const key = line[0].trim().toLowerCase().replace(/\s+/g, '_');
+                    obj[key] = line[1].trim();
                 }
             });
             return obj;
