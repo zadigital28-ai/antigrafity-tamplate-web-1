@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Toko</title>
+    <title>Toko Produk Digital</title>
     <!-- Dynamic Meta Tags -->
     <meta name="description" content="Toko Produk Digital">
     <meta name="keywords" content="produk digital, template">
@@ -16,7 +16,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=Syne:wght@400..800&display=swap" rel="stylesheet">
-    <script src="./config.js"></script>
     
     <style>
         :root {
@@ -1153,47 +1152,78 @@
                 gap: 10px;
             }
         }
+    
+        
+        /* Modal & Drawer Background Fix for Readability */
+        .modal-content, .cart-drawer {
+            background: rgba(255, 255, 255, 0.95) !important;
+            backdrop-filter: blur(20px) !important;
+            -webkit-backdrop-filter: blur(20px) !important;
+            color: var(--color-text) !important;
+        }
+        html.dark .modal-content, html.dark .cart-drawer {
+            background: rgba(15, 23, 42, 0.95) !important;
+        }
+        
+        @media (max-width: 900px) {
+            .nav-menu {
+                background: rgba(255, 255, 255, 0.95) !important;
+                backdrop-filter: blur(20px) !important;
+                -webkit-backdrop-filter: blur(20px) !important;
+            }
+            html.dark .nav-menu {
+                background: rgba(15, 23, 42, 0.95) !important;
+            }
+        }
+
+        /* Desktop Nav Menu Capsule Spacing */
+        @media (min-width: 901px) {
+            .nav-menu {
+                padding: 10px 24px !important;
+                border-radius: 999px !important;
+                gap: 30px !important;
+            }
+        }
+        
     </style>
 
     <style>
         /* OVERRIDE TEMA */
         
-        :root {
-            --border-color: #000;
-            --card-shadow: 4px 4px 0px #000;
+        body {
+            background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%) !important;
+            background-attachment: fixed !important;
         }
-        html.dark {
-            --border-color: #fff;
-            --card-shadow: 4px 4px 0px #fff;
+        html.dark body {
+            background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%) !important;
+            background-attachment: fixed !important;
         }
-        * { border-radius: 0 !important; }
-        .product-card, .benefit-card, .bonus-item, .testi-card, .order-steps, .modal-content, .search-bar, .tab-btn {
-            border: 2px solid var(--border-color) !important;
-            box-shadow: var(--card-shadow) !important;
-            transition: transform 0.1s !important;
+        .product-card, .benefit-card, .bonus-item, .testi-card, .order-steps, .modal-content, .cart-drawer, .nav-menu, nav, .search-bar, .tab-btn, .qty-controls {
+            background: rgba(255, 255, 255, 0.2) !important;
+            backdrop-filter: blur(12px) !important;
+            -webkit-backdrop-filter: blur(12px) !important;
+            border: 1px solid rgba(255, 255, 255, 0.3) !important;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1) !important;
+            border-radius: 20px !important;
         }
-        .product-card:hover, .benefit-card:hover, .bonus-item:hover {
-            transform: translate(-2px, -2px) !important;
-            box-shadow: 6px 6px 0px var(--border-color) !important;
+        html.dark .product-card, html.dark .benefit-card, html.dark .bonus-item, html.dark .testi-card, html.dark .order-steps, html.dark .modal-content, html.dark .cart-drawer, html.dark .nav-menu, html.dark nav, html.dark .search-bar, html.dark .tab-btn, html.dark .qty-controls {
+            background: rgba(0, 0, 0, 0.3) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4) !important;
         }
-        .btn, .qty-controls { 
-            border: 2px solid var(--border-color) !important; 
-            box-shadow: 2px 2px 0px var(--border-color) !important; 
-            font-weight: 800 !important;
-            text-transform: uppercase !important;
+        .btn-primary { 
+            background: rgba(255,255,255,0.4) !important; 
+            backdrop-filter: blur(5px) !important; 
+            border: 1px solid rgba(255,255,255,0.4) !important; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05) !important;
         }
-        .btn:hover { 
-            transform: translate(-1px, -1px) !important; 
-            box-shadow: 3px 3px 0px var(--border-color) !important; 
+        html.dark .btn-primary { 
+            background: rgba(255,255,255,0.15) !important; 
+            color: white !important;
         }
-        nav { border-bottom: 2px solid var(--border-color) !important; box-shadow: 0 4px 0px var(--border-color) !important; }
-        .cart-drawer, .nav-menu { 
-            border-left: 2px solid var(--border-color) !important; 
-            box-shadow: -4px 0 0px var(--border-color) !important; 
-        }
-        .badge { border: 2px solid #000 !important; color: #000 !important; font-weight: 900 !important; }
         
     </style>
+    <script src="./config.js"></script>
 </head>
 <body>
 
