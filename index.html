@@ -46,14 +46,17 @@ tailwind.config = {
 </head>
 <body class="bg-neu-bg text-neu-text min-h-screen">
 
-<!-- Shared logic (portable - semua ada di dalam folder ini) -->
+<!-- 1. React & ReactDOM harus PERTAMA (core-logic.js butuh window.React) -->
+<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+
+<!-- 2. Config + shared logic (menggunakan window.React yang sudah tersedia) -->
 <script src="./config.js"></script>
 <script src="./core-logic.js"></script>
 
 <div id="root"></div>
 
-<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+<!-- 3. Babel terakhir (memproses JSX di bawah) -->
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 <script type="text/babel">
 const { useState, useEffect, useRef, useCallback } = React;
