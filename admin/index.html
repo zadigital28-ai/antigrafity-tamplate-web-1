@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: { extend: {
+    fontFamily: { sans: ['Space Grotesk','sans-serif'] },
+    boxShadow: { neu: '3px 3px 0 #000', 'neu-sm': '2px 2px 0 #000' }
+  }}
+}
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  body { font-family:'Space Grotesk',sans-serif; background:#f0f4ff; color:#0a1645; }
+  @keyframes spin { to { transform:rotate(360deg) } }
+  .spin { animation:spin .8s linear infinite; }
+</style>
+</head>
+<body class="min-h-screen">
+
+<script src="../../../config.js"></script>
+<script src="../../../shared/admin-logic.js"></script>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useEffect, useCallback } = React;
+const A = window.ADMIN;
+
+/* ── Toast notifikasi ── */
+function Toast({ msg, ok }) {
+  if (!msg) return null;
+  return (
+    <div className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-xl border-2 border-black shadow-neu font-bold text-sm ${ok?'bg-green-300':'bg-red-300'}`}>
+      {ok ? '✅' : '❌'} {msg}
+    </div>
+  );
+}
+
+/* ── Loading spinner ── */
+function Spinner() {
+  return <div className="w-6 h-6 border-4 border-blue-500 border-t-transparent rounded-full spin mx-auto"/>;
+}
+
+/* ── Dynamic Form — otomatis dari headers GAS ── */
+function DynamicForm({ fields, onChange, values }) {
+  // fields: [{key, label, type, value}]
+  return (
+    <div className="space-y-3">
+      {fields.map(f => (
+        <div key={f.key}>
+          <label className="block text-xs font-black uppercase mb-1">{f.label}</label>
+          {f.type === 'textarea' ? (
+            <textarea data-field={f.key} value={values[f.key]||''} onChange={e=>onChange(f.key,e.target.value)}
+              className="w-full border-2 border-black rounded-lg px-3 py-2 text-sm bg-white shadow-neu-sm focus:outline-none resize-none" rows={3}/>
+          ) : f.type === 'select-stok' ? (
+            <select data-field={f.key} value={values[f.key]||''} onChange={e=>onChange(f.key,e.target.value)}
+              className="w-full border-2 border-black rounded-lg px-3 py-2 text-sm bg-white shadow-neu-sm focus:outline-none">
+              <option value="">-- Pilih --</option>
+              {['Tersedia','Habis','Segera'].map(o=><option key={o}>{o}</option>)}
+            </select>
+          ) : f.type === 'select-badge' ? (
+            <select data-field={f.key} value={values[f.key]||''} onChange={e=>onChange(f.key,e.target.value)}
+              className="w-full border-2 border-black rounded-lg px-3 py-2 text-sm bg-white shadow-neu-sm focus:outline-none">
+              <option value="">-- Tidak Ada --</option>
+              {['Terlaris','Promo','Baru'].map(o=><option key={o}>{o}</option>)}
+            </select>
+          ) : (
+            <input type={f.type==='number'||f.type==='url'?f.type:'text'} data-field={f.key}
+              value={values[f.key]||''} onChange={e=>onChange(f.key,e.target.value)}
+              placeholder={f.type==='url'?'https://...':''}
+              className="w-full border-2 border-black rounded-lg px-3 py-2 text-sm bg-white shadow-neu-sm focus:outline-none"/>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ── Branding Editor (key-value khusus) ── */
+function BrandingEditor({ onToast }) {
+  const [data, setData] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    A.fetchBranding().then(d => { setData(d); setLoading(false); }).catch(() => setLoading(false));
+  }, []);
+
+  const handle = (k, v) => setData(prev => ({...prev, [k]: v}));
+
+  const save = async () => {
+    setSaving(true);
+    try {
+      const res = await A.updateBranding(data);
+      onToast(res.message || 'Tersimpan!', true);
+    } catch(e) { onToast('Gagal menyimpan.', false); }
+    setSaving(false);
+  };
+
+  if (loading) return <div className="py-8"><Spinner/></div>;
+
+  const fields = A.buildFormFields(Object.keys(data), data);
+
+  return (
+    <div>
+      <DynamicForm fields={fields} values={data} onChange={handle}/>
+      <button onClick={save} disabled={saving}
+        className="mt-4 w-full bg-[#0eeef7] border-2 border-black font-black uppercase py-3 rounded-xl shadow-neu text-sm disabled:opacity-50">
+        {saving ? <Spinner/> : '💾 Simpan Branding'}
+      </button>
+    </div>
+  );
+}
+
+/* ── Table Sheet Editor ── */
+function SheetEditor({ sheetName, onToast }) {
+  const [sheetData, setSheetData] = useState({ headers: [], rows: [] });
+  const [loading, setLoading] = useState(true);
+  const [formValues, setFormValues] = useState({});
+  const [editRow, setEditRow] = useState(null); // null=add, rowIndex=edit
+  const [showForm, setShowForm] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  const load = useCallback(() => {
+    setLoading(true);
+    A.fetchData(sheetName).then(d => { setSheetData(d); setLoading(false); });
+  }, [sheetName]);
+
+  useEffect(() => { load(); }, [load]);
+
+  const openAdd = () => {
+    setEditRow(null);
+    setFormValues({});
+    setShowForm(true);
+  };
+
+  const openEdit = (row) => {
+    const vals = {};
+    sheetData.headers.forEach((h, i) => { vals[h] = row.values[i] || ''; });
+    setEditRow(row._rowIndex);
+    setFormValues(vals);
+    setShowForm(true);
+  };
+
+  const handleChange = (k, v) => setFormValues(prev => ({...prev, [k]: v}));
+
+  const save = async () => {
+    setSaving(true);
+    try {
+      let res;
+      if (editRow) {
+        res = await A.updateRow(sheetName, editRow, formValues);
+      } else {
+        res = await A.addRow(sheetName, formValues);
+      }
+      onToast(res.message || 'Tersimpan!', res.success !== false);
+      setShowForm(false);
+      load();
+    } catch(e) { onToast('Gagal menyimpan.', false); }
+    setSaving(false);
+  };
+
+  const del = async (rowIndex) => {
+    if (!confirm('Hapus baris ini?')) return;
+    try {
+      const res = await A.deleteRow(sheetName, rowIndex);
+      onToast(res.message || 'Dihapus!', res.success !== false);
+      load();
+    } catch(e) { onToast('Gagal menghapus.', false); }
+  };
+
+  const fields = A.buildFormFields(sheetData.headers, formValues);
+
+  if (loading) return <div className="py-8"><Spinner/></div>;
+
+  return (
+    <div>
+      {/* Form tambah/edit */}
+      {showForm && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-end md:items-center justify-center p-4">
+          <div className="bg-white border-2 border-black rounded-2xl shadow-neu w-full max-w-md max-h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between p-4 border-b-2 border-black">
+              <h3 className="font-black text-base uppercase">{editRow ? 'Edit Baris' : 'Tambah Baru'}</h3>
+              <button onClick={()=>setShowForm(false)} className="font-black text-xl">✕</button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4">
+              <DynamicForm fields={fields} values={formValues} onChange={handleChange}/>
+            </div>
+            <div className="p-4 border-t-2 border-black flex gap-2">
+              <button onClick={()=>setShowForm(false)} className="flex-1 border-2 border-black font-black py-2 rounded-xl text-sm">Batal</button>
+              <button onClick={save} disabled={saving} className="flex-1 bg-[#0eeef7] border-2 border-black font-black py-2 rounded-xl shadow-neu text-sm disabled:opacity-50">
+                {saving ? <Spinner/> : '💾 Simpan'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <button onClick={openAdd} className="mb-4 bg-[#0eeef7] border-2 border-black font-black uppercase px-4 py-2 rounded-xl shadow-neu text-sm">
+        + Tambah Baris
+      </button>
+
+      {sheetData.rows.length === 0 ? (
+        <p className="text-center text-gray-500 py-8 font-bold">Belum ada data.</p>
+      ) : (
+        <div className="space-y-3">
+          {sheetData.rows.map((row, i) => (
+            <div key={i} className="border-2 border-black rounded-xl p-3 bg-white shadow-neu-sm">
+              <div className="text-xs space-y-1 mb-3">
+                {sheetData.headers.slice(0, 4).map((h, j) => (
+                  <div key={h} className="flex gap-2">
+                    <span className="font-black uppercase text-[10px] text-gray-500 w-24 shrink-0">{h}:</span>
+                    <span className="text-xs truncate">{row.values[j]||'-'}</span>
+                  </div>
+                ))}
+                {sheetData.headers.length > 4 && (
+                  <div className="text-[10px] text-gray-400">+{sheetData.headers.length-4} kolom lain...</div>
+                )}
+              </div>
+              <div className="flex gap-2">
+                <button onClick={()=>openEdit(row)} className="flex-1 border-2 border-black font-black text-xs py-2 rounded-lg shadow-neu-sm">✏ Edit</button>
+                <button onClick={()=>del(row._rowIndex)} className="flex-1 border-2 border-red-500 text-red-500 font-black text-xs py-2 rounded-lg">🗑 Hapus</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ── MAIN APP ── */
+function AdminApp() {
+  const [sheets, setSheets] = useState([]);
+  const [active, setActive] = useState('Branding');
+  const [loading, setLoading] = useState(true);
+  const [toast, setToast] = useState({ msg: '', ok: true });
+
+  useEffect(() => {
+    A.fetchSheets()
+      .then(s => { setSheets(s); setLoading(false); })
+      .catch(() => { setSheets(['Branding','Produk','Testimoni','FAQ']); setLoading(false); });
+  }, []);
+
+  const showToast = (msg, ok) => {
+    setToast({ msg, ok });
+    setTimeout(() => setToast({ msg: '', ok: true }), 3000);
+  };
+
+  return (
+    <div className="min-h-screen">
+      {/* Header */}
+      <div className="bg-[#0a1645] text-white px-4 py-4 flex items-center justify-between border-b-4 border-[#0eeef7]">
+        <div>
+          <h1 className="font-black text-lg uppercase tracking-tight">⚙ Admin Dashboard</h1>
+          <p className="text-xs text-white/60 truncate max-w-[220px]">{window.GAS_URL}</p>
+        </div>
+        <a href="../index.html" className="text-xs border border-white/30 px-3 py-1 rounded-lg font-bold hover:bg-white/10">← Toko</a>
+      </div>
+
+      {/* Sheet Tabs */}
+      {loading ? (
+        <div className="py-10"><Spinner/></div>
+      ) : (
+        <>
+          <div className="flex overflow-x-auto gap-2 px-4 py-3 border-b-2 border-black bg-white">
+            {sheets.map(s => (
+              <button key={s} onClick={() => setActive(s)}
+                className={`shrink-0 px-4 py-2 text-xs font-black uppercase border-2 border-black rounded-xl shadow-neu-sm transition-colors ${active===s?'bg-[#0eeef7]':'bg-white'}`}>
+                {s}
+              </button>
+            ))}
+          </div>
+
+          {/* Content */}
+          <div className="p-4 max-w-2xl mx-auto">
+            <h2 className="font-black text-xl uppercase mb-4" style={{textShadow:'3px 3px 0 #0eeef7'}}>
+              {active}
+            </h2>
+            {active === 'Branding'
+              ? <BrandingEditor key={active} onToast={showToast}/>
+              : <SheetEditor key={active} sheetName={active} onToast={showToast}/>
+            }
+          </div>
+        </>
+      )}
+
+      <Toast msg={toast.msg} ok={toast.ok}/>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(AdminApp));
+</script>
+</body>
+</html>
